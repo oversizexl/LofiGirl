@@ -51,6 +51,8 @@ def fetch_flv_url(room_id: int, qn: int = DEFAULT_QN) -> str | None:
     req = urllib.request.Request(f"{API_URL}?{params}", headers=HEADERS)
     data = json.loads(urllib.request.urlopen(req, timeout=10).read())
     playurl = data["data"]["playurl_info"]["playurl"]
+    if playurl is None:
+        return None
 
     for stream in playurl["stream"]:
         if stream["protocol_name"] != "http_stream":
