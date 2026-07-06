@@ -405,6 +405,10 @@ async def index(request: Request):
     return window.location.origin + '/live/' + rid + '.flv';
   }}
 
+  function isSeed(rid) {{
+    return SERVER_SEEDS.includes(rid);
+  }}
+
   function render() {{
     const ids = loadRooms();
     const list = document.getElementById('room-list');
@@ -418,12 +422,13 @@ async def index(request: Request):
     }}
 
     list.innerHTML = ids.map(rid => {{
+      const seed = isSeed(rid);
       return '<div class="room-row" data-rid="' + rid + '">'
         + '<div class="room-header">'
         + '<span class="room-dot" id="dot-' + rid + '"></span>'
-        + '<span class="room-label">Room ' + rid + '</span>'
+        + '<span class="room-label">Room ' + rid + (seed ? ' <span style="font-size:10px;color:#484f58;font-weight:400;">(default)</span>' : '') + '</span>'
         + '<span class="room-status" id="st-' + rid + '">...</span>'
-        + '<button class="room-del" data-rid="' + rid + '">Remove</button>'
+        + (seed ? '' : '<button class="room-del" data-rid="' + rid + '">Remove</button>')
         + '</div>'
         + '<div class="url-row">'
         + '<div class="url-box">' + buildUrl(rid) + '</div>'
@@ -532,6 +537,7 @@ async def index(request: Request):
 
 
 @app.get("/live/{room_id}.flv")
+@app.head("/live/{room_id}.flv")
 async def proxy_flv(room_id: int):
     cdn_url = get_cached_url(room_id)
     if cdn_url is None:
